@@ -1,40 +1,49 @@
-import java.io.BufferedReader;
+package Server;
+
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.Scanner;
 
-public class ClientThread extends ChatServer implements Runnable {
-
+public class ClientThread implements Runnable {
     private Socket socket;
-    private BufferedReader in;
-    private PrintWriter out;
+    private PrintWriter clientOut;
+    private ChatServer server;
 
-    public ClientThread(Socket socket) {
+    public ClientThread(ChatServer server, Socket socket){
+        this.server = server;
         this.socket = socket;
+    }
+
+    private PrintWriter getWriter(){
+        return clientOut;
     }
 
     @Override
     public void run() {
-        try {
-            out = new PrintWriter(socket.getOutputStream(), true);
-            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        try{
+            // Setup
+            this.clientOut = new PrintWriter(socket.getOutputStream(), false);
+            Scanner in = new Scanner(socket.getInputStream());
 
-            // While the socket is alive
-            while(!socket.isClosed()) {
-                String input = in.readLine();
-                if (input != null) {
-                    for (ClientThread client : clients) {
-                        client.getWriter().write(input);
+            // Start communicating
+            while(!socket.isClosed()){
+                if(in.hasNextLine()){
+                    String input = in.nextLine();
+
+                    System.out.println(input); // Server read chat
+
+                    for(ClientThread thatClient : server.getClients()){
+                        PrintWriter thatClientOut = thatClient.getWriter();
+                        if(thatClientOut != null){
+                            thatClientOut.write(input + "\r\n");
+                            thatClientOut.flush();
+                        }
                     }
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    public PrintWriter getWriter() {
-        return out;
     }
 }

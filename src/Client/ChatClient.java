@@ -1,28 +1,61 @@
+package Client;
+
 import java.io.IOException;
 import java.net.Socket;
 import java.util.Scanner;
 
 public class ChatClient {
 
-    public static void main(String[] args) {
-        Socket socket = null;
-        System.out.println("Please enter username");
-        Scanner scanner = new Scanner(System.in);
-        String name = scanner.nextLine();
-        scanner.close();
-        int portNumber = 4444;
+    private static final String host = "localhost";
+    private static final int portNumber = 4444;
 
-        try {
-            socket = new Socket("localhost", portNumber);
+    private String userName;
+    private String serverHost;
+    private int serverPort;
+    private Scanner userInputScanner;
+
+    public static void main(String[] args){
+        String readName = null;
+        Scanner scan = new Scanner(System.in);
+        System.out.println("Enter Username:");
+        while(readName == null || readName.trim().equals("")) {
+            readName = scan.nextLine();
+            if(readName.trim().equals("")){
+                System.out.println("Invalid. Please enter again:");
+            }
+        }
+
+        ChatClient client = new ChatClient(readName, host, portNumber);
+        client.startClient(scan);
+    }
+
+    private ChatClient(String userName, String host, int portNumber){
+        this.userName = userName;
+        this.serverHost = host;
+        this.serverPort = portNumber;
+    }
+
+    private void startClient(Scanner scan){
+        try{
+            Socket socket = new Socket(serverHost, serverPort);
+
+            // Waiting for network communication
             Thread.sleep(1000);
-            Thread server = new Thread(new ServerThread(socket, name));
-            server.start();
-        } catch (IOException e) {
+
+            ServerThread serverThread = new ServerThread(socket, userName);
+            Thread serverAccessThread = new Thread(serverThread);
+            serverAccessThread.start();
+            while(serverAccessThread.isAlive()){
+                if(scan.hasNextLine()){
+                    serverThread.addNextMessage(scan.nextLine());
+                }
+                // Thread blocked, look in to BufferedReader
+            }
+        }catch(IOException ex){
             System.err.println("Fatal Connection error!");
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            System.err.println("Fatal connection error!");
-            e.printStackTrace();
+            ex.printStackTrace();
+        }catch(InterruptedException ex){
+            System.out.println("Interrupted");
         }
     }
 }
