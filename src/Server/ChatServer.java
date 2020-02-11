@@ -5,6 +5,8 @@ import java.util.ArrayList;
 
 public class ChatServer {
 
+    public static ArrayList<ClientThread> clients;
+
     public static void main(String[] args) {
         int portNumber = 4444;
         ServerSocket serverSocket = null;
@@ -19,7 +21,7 @@ public class ChatServer {
     }
 
     public static void acceptClients(ServerSocket serverSocket, int portNumber) {
-        ArrayList<ClientThread> clients = new ArrayList<ClientThread>();
+        clients = new ArrayList<ClientThread>();
         while(true) {
             try {
                 Socket socket = serverSocket.accept();
