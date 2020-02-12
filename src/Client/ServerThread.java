@@ -2,6 +2,8 @@ package Client;
 
 import java.io.*;
 import java.net.Socket;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.Scanner;
 
@@ -51,7 +53,8 @@ public class ServerThread implements Runnable {
                         nextSend = messagesToSend.pop();
                         hasMessages = !messagesToSend.isEmpty();
                     }
-                    serverOut.println(userName + " - " + nextSend);
+                    String timeStamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+                    serverOut.println(timeStamp + "\n" + userName + " - " + nextSend);
                     serverOut.flush();
                 }
             }
