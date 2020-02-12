@@ -9,7 +9,7 @@ import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.Scanner;
 
-public class ChatClient {
+public class Client {
 
     private static String host = "localhost";
     private static int portNumber = 4444;
@@ -19,7 +19,7 @@ public class ChatClient {
     private String serverHost;
     private int serverPort;
 
-    public static void main(String[] args){
+    public static void main(String[] args) {
         String readName = null;
         Scanner scan = new Scanner(System.in);
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
@@ -30,25 +30,25 @@ public class ChatClient {
         }
 
         System.out.println("Enter Username:");
-        while(readName == null || readName.trim().equals("")) {
+        while (readName == null || readName.trim().equals("")) {
             readName = scan.nextLine();
-            if(readName.trim().equals("")){
+            if (readName.trim().equals("")) {
                 System.out.println("Invalid. Please enter again:");
             }
         }
 
-        ChatClient client = new ChatClient(readName, host, portNumber);
+        Client client = new Client(readName, host, portNumber);
         client.startClient(bufferedReader);
     }
 
-    private ChatClient(String name, String host, int portNumber) {
+    private Client(String name, String host, int portNumber) {
         this.userName = name;
         this.serverHost = host;
         this.serverPort = portNumber;
     }
 
-    private void startClient(BufferedReader bufferedReader){
-        try{
+    private void startClient(BufferedReader bufferedReader) {
+        try {
             Socket socket = new Socket(serverHost, serverPort);
 
             // Waiting for network communication
@@ -57,16 +57,18 @@ public class ChatClient {
             ServerThread serverThread = new ServerThread(socket, userName);
             Thread serverAccessThread = new Thread(serverThread);
             serverAccessThread.start();
-            while(serverAccessThread.isAlive()) {
+            while (serverAccessThread.isAlive()) {
                 String line;
-                if((line = bufferedReader.readLine()) != null){
+                if ((line = bufferedReader.readLine()) != null) {
                     serverThread.addNextMessage(line);
+                } else {
+                    Thread.sleep(200);
                 }
             }
-        } catch(IOException ex){
+        } catch (IOException ex) {
             System.err.println("Fatal Connection error!");
             ex.printStackTrace();
-        } catch(InterruptedException ex){
+        } catch (InterruptedException ex) {
             System.out.println("Interrupted");
         }
     }

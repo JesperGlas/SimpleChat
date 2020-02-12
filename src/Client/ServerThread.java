@@ -13,14 +13,14 @@ public class ServerThread implements Runnable {
     private final LinkedList<String> messagesToSend;
     private boolean hasMessages = false;
 
-    public ServerThread(Socket socket, String userName){
+    public ServerThread(Socket socket, String userName) {
         this.socket = socket;
         this.userName = userName;
         messagesToSend = new LinkedList<String>();
     }
 
-    public void addNextMessage(String message){
-        synchronized (messagesToSend){
+    public void addNextMessage(String message) {
+        synchronized (messagesToSend) {
             hasMessages = true;
             messagesToSend.push(message);
         }
@@ -33,33 +33,34 @@ public class ServerThread implements Runnable {
         System.out.println("Local Port :" + socket.getLocalPort());
         System.out.println("Server = " + socket.getRemoteSocketAddress() + ":" + socket.getPort());
 
-        try{
+        try {
             PrintWriter serverOut = new PrintWriter(socket.getOutputStream(), false);
             InputStream serverInStream = socket.getInputStream();
             Scanner serverIn = new Scanner(serverInStream);
 
-            while(!socket.isClosed()) {
-                if(serverInStream.available() > 0){
-                    if(serverIn.hasNextLine()){
+            while (socket.isConnected()) {
+                if (serverInStream.available() > 0) {
+                    if (serverIn.hasNextLine()) {
                         System.out.println(serverIn.nextLine());
                     }
                 } else {
                     // Used to prevent high CPU usage
                     Thread.sleep(200);
                 }
-                if(hasMessages){
+                if (hasMessages) {
                     String nextSend = "";
-                    synchronized(messagesToSend){
+                    synchronized (messagesToSend) {
                         nextSend = messagesToSend.pop();
                         hasMessages = !messagesToSend.isEmpty();
                     }
                     String timeStamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
-                    serverOut.println(timeStamp + "\n" + userName + " - " + nextSend);
+                    serverOut.println(timeStamp + " - " + userName + " - " + nextSend);
                     serverOut.flush();
                 }
             }
-        }
-        catch(IOException e){
+            // Close socket on exit
+            socket.close();
+        } catch (IOException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
             e.printStackTrace();
