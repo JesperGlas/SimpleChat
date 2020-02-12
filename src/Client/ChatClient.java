@@ -1,6 +1,8 @@
 package Client;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.Scanner;
 
@@ -17,6 +19,7 @@ public class ChatClient {
     public static void main(String[] args){
         String readName = null;
         Scanner scan = new Scanner(System.in);
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
         System.out.println("Enter Username:");
         while(readName == null || readName.trim().equals("")) {
             readName = scan.nextLine();
@@ -26,7 +29,7 @@ public class ChatClient {
         }
 
         ChatClient client = new ChatClient(readName, host, portNumber);
-        client.startClient(scan);
+        client.startClient(bufferedReader);
     }
 
     private ChatClient(String userName, String host, int portNumber){
@@ -35,7 +38,7 @@ public class ChatClient {
         this.serverPort = portNumber;
     }
 
-    private void startClient(Scanner scan){
+    private void startClient(BufferedReader bufferedReader){
         try{
             Socket socket = new Socket(serverHost, serverPort);
 
@@ -45,16 +48,17 @@ public class ChatClient {
             ServerThread serverThread = new ServerThread(socket, userName);
             Thread serverAccessThread = new Thread(serverThread);
             serverAccessThread.start();
-            while(serverAccessThread.isAlive()){
-                if(scan.hasNextLine()){
-                    serverThread.addNextMessage(scan.nextLine());
+            while(serverAccessThread.isAlive()) {
+                System.out.println("Busy wait?");
+                String line;
+                if((line = bufferedReader.readLine()) != null){
+                    serverThread.addNextMessage(line);
                 }
-                // Thread blocked, look in to BufferedReader
             }
-        }catch(IOException ex){
+        } catch(IOException ex){
             System.err.println("Fatal Connection error!");
             ex.printStackTrace();
-        }catch(InterruptedException ex){
+        } catch(InterruptedException ex){
             System.out.println("Interrupted");
         }
     }

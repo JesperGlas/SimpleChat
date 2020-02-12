@@ -25,7 +25,7 @@ public class ServerThread implements Runnable {
     }
 
     @Override
-    public void run(){
+    public void run() {
         System.out.println("Welcome :" + userName);
 
         System.out.println("Local Port :" + socket.getLocalPort());
@@ -36,11 +36,14 @@ public class ServerThread implements Runnable {
             InputStream serverInStream = socket.getInputStream();
             Scanner serverIn = new Scanner(serverInStream);
 
-            while(!socket.isClosed()){
+            while(!socket.isClosed()) {
                 if(serverInStream.available() > 0){
                     if(serverIn.hasNextLine()){
                         System.out.println(serverIn.nextLine());
                     }
+                } else {
+                    // Used to prevent high CPU usage
+                    Thread.sleep(200);
                 }
                 if(hasMessages){
                     String nextSend = "";
@@ -48,13 +51,15 @@ public class ServerThread implements Runnable {
                         nextSend = messagesToSend.pop();
                         hasMessages = !messagesToSend.isEmpty();
                     }
-                    serverOut.println(userName + " > " + nextSend);
+                    serverOut.println(userName + " - " + nextSend);
                     serverOut.flush();
                 }
             }
         }
-        catch(IOException ex){
-            ex.printStackTrace();
+        catch(IOException e){
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
 
     }
