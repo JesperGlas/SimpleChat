@@ -27,17 +27,17 @@ public class ClientThread implements Runnable {
             Scanner in = new Scanner(socket.getInputStream());
 
             // Start communicating
-            while (socket.isConnected()) {
+            while (!socket.isClosed()) {
                 if (in.hasNextLine()) {
                     String input = in.nextLine();
 
-                    System.out.println(input); // Server read chat
+                    System.out.println(input); // Server print chat
 
-                    for (ClientThread thatClient : server.getClients()) {
-                        PrintWriter thatClientOut = thatClient.getWriter();
-                        if (thatClientOut != null) {
-                            thatClientOut.write(input + "\r\n");
-                            thatClientOut.flush();
+                    for (ClientThread client : server.getClients()) {
+                        PrintWriter clientOut = client.getWriter();
+                        if (clientOut != null) {
+                            clientOut.write(input + "\r\n");
+                            clientOut.flush();
                         }
                     }
                 }

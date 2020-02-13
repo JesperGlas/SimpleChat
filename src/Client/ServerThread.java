@@ -38,7 +38,7 @@ public class ServerThread implements Runnable {
             InputStream serverInStream = socket.getInputStream();
             Scanner serverIn = new Scanner(serverInStream);
 
-            while (socket.isConnected()) {
+            while (!socket.isClosed()) {
                 if (serverInStream.available() > 0) {
                     if (serverIn.hasNextLine()) {
                         System.out.println(serverIn.nextLine());
@@ -65,6 +65,5 @@ public class ServerThread implements Runnable {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
     }
 }
