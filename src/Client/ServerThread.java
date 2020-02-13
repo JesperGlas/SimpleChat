@@ -1,9 +1,11 @@
 package Client;
 
-import java.io.*;
+import Shared.Payload;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
 import java.net.Socket;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.Scanner;
 
@@ -28,7 +30,7 @@ public class ServerThread implements Runnable {
 
     @Override
     public void run() {
-        System.out.println("Welcome :" + userName);
+        System.out.println("Welcome: " + userName);
 
         System.out.println("Local Port :" + socket.getLocalPort());
         System.out.println("Server = " + socket.getRemoteSocketAddress() + ":" + socket.getPort());
@@ -41,7 +43,10 @@ public class ServerThread implements Runnable {
             while (socket.isConnected()) {
                 if (serverInStream.available() > 0) {
                     if (serverIn.hasNextLine()) {
-                        System.out.println(serverIn.nextLine());
+                        String receivedString = serverIn.nextLine();
+                        Payload receivedPayload = new Payload(receivedString);
+                        // Prints message to client
+                        System.out.println(">> " + receivedPayload.getSender() + " " + receivedPayload.getTimeStampString() + "\n" + "> " + receivedPayload.getBody());
                     }
                 } else {
                     // Used to prevent high CPU usage
@@ -53,8 +58,9 @@ public class ServerThread implements Runnable {
                         nextSend = messagesToSend.pop();
                         hasMessages = !messagesToSend.isEmpty();
                     }
-                    String timeStamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
-                    serverOut.println(timeStamp + " - " + userName + " - " + nextSend);
+                    Payload messagePayload = new Payload(1, userName, nextSend);
+                    // Sends message payload to server
+                    serverOut.println(messagePayload.toString());
                     serverOut.flush();
                 }
             }

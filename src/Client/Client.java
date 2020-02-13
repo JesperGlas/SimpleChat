@@ -1,11 +1,14 @@
 package Client;
 
+import Encryption.RSAKeyGen;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.Scanner;
 
@@ -18,11 +21,20 @@ public class Client {
     private String userName;
     private String serverHost;
     private int serverPort;
+    private RSAKeyGen keyGen;
 
     public static void main(String[] args) {
         String readName = null;
         Scanner scan = new Scanner(System.in);
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+
+        try {
+            RSAKeyGen keyGen = new RSAKeyGen();
+        } catch (NoSuchAlgorithmException e) {
+            System.out.println("Fatal Error: Failed to generate encryption keys..");
+            e.printStackTrace();
+            System.exit(1);
+        }
 
         while (hostAccepted == false) {
             host = promptHostIP(scan);

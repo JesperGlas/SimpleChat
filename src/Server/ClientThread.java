@@ -1,5 +1,7 @@
 package Server;
 
+import Shared.Payload;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
@@ -30,8 +32,12 @@ public class ClientThread implements Runnable {
             while (socket.isConnected()) {
                 if (in.hasNextLine()) {
                     String input = in.nextLine();
+                    Payload messagePayload = new Payload(input);
 
-                    System.out.println(input); // Server read chat
+                    // Server print on terminal
+                    System.out.println(
+                            ">> " + messagePayload.getSender() + " " + messagePayload.getTimeStampString() + "\n" + "> " + messagePayload.getBody()
+                    );
 
                     for (ClientThread thatClient : server.getClients()) {
                         PrintWriter thatClientOut = thatClient.getWriter();
