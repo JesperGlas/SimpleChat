@@ -57,4 +57,8 @@ public class Payload {
     public String toString() {
         return this.code + divider + getTimeStampString() + divider + this.sender + divider + this.body;
     }
+
+    public String printString() {
+        return ">> " + getSender() + " " + getTimeStampString() + "\n" + "> " + getBody();
+    }
 }

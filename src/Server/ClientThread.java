@@ -35,15 +35,16 @@ public class ClientThread implements Runnable {
                     Payload messagePayload = new Payload(input);
 
                     // Server print on terminal
-                    System.out.println(
-                            ">> " + messagePayload.getSender() + " " + messagePayload.getTimeStampString() + "\n" + "> " + messagePayload.getBody()
-                    );
+                    System.out.println(messagePayload.printString());
 
-                    for (ClientThread client : server.getClients()) {
-                        PrintWriter clientOut = client.getWriter();
-                        if (clientOut != null) {
-                            clientOut.write(input + "\r\n");
-                            clientOut.flush();
+                    // Server send to clients
+                    if (messagePayload.getCode() == 1) {
+                        for (ClientThread thatClient : server.getClients()) {
+                            PrintWriter thatClientOut = thatClient.getWriter();
+                            if (thatClientOut != null) {
+                                thatClientOut.write(input + "\r\n");
+                                thatClientOut.flush();
+                            }
                         }
                     }
                 }

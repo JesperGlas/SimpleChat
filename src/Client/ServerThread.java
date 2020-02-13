@@ -45,8 +45,8 @@ public class ServerThread implements Runnable {
                     if (serverIn.hasNextLine()) {
                         String receivedString = serverIn.nextLine();
                         Payload receivedPayload = new Payload(receivedString);
-                        // Prints message to client
-                        System.out.println(">> " + receivedPayload.getSender() + " " + receivedPayload.getTimeStampString() + "\n" + "> " + receivedPayload.getBody());
+                        // Prints message to clients
+                        System.out.println(receivedPayload.printString());
                     }
                 } else {
                     // Used to prevent high CPU usage
